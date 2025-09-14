@@ -11,7 +11,7 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/orders", o.CreateOrderHandler)
 
-  logger.Logger.Println("Starting eco-orders service on :8080")
+  logger.Info("Starting eco-orders service on :8080")
 	if err := http.ListenAndServe(":8080", mux); err != nil {
 		log.Fatal(err)
 	}

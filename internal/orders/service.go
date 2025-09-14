@@ -8,7 +8,7 @@ import (
 var nextOrderID = 1
 
 func ProcessOrder(req OrderRequest) (OrderResponse, error) {
-  logger.Logger.Println("Processing order:", req)
+  logger.Info("Processing order:", req)
 	if len(req.Items) == 0 {
 		return OrderResponse{}, errors.New("order must contain at least one item")
 	}
@@ -24,11 +24,11 @@ func ProcessOrder(req OrderRequest) (OrderResponse, error) {
 	orderID := nextOrderID
 	nextOrderID++
 
-	return OrderResponse{
+	resp := OrderResponse{
 		OrderID: orderID,
 		Status:  "processed",
 		Total:   total,
 	}
-  logger.Logger.Println("Order processed successfully:", resp)
+  logger.Success("Order processed successfully:", resp)
 	return resp, nil
 }
