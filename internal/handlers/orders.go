@@ -7,7 +7,11 @@ import (
   "github.com/JamesAndresCM/eco_orders/pkg/logger"
 )
 
-func CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
+type OrderHandler struct {
+    Service *o.Service
+}
+
+func (h *OrderHandler) CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
   logger.Info("Received a request to create an order")
 	if r.Method != http.MethodPost {
     logger.Warn("Invalid method:", r.Method)
@@ -22,7 +26,7 @@ func CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp, err := o.ProcessOrder(req)
+	resp, err := h.Service.ProcessOrder(req)
 	if err != nil {
     logger.Error("Error processing order:", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)

@@ -1,5 +1,7 @@
 package orders
 
+import "github.com/shopspring/decimal"
+
 type OrderItem struct {
 	ProductID int `json:"product_id"`
 	Quantity  int `json:"quantity"`
@@ -13,5 +15,5 @@ type OrderRequest struct {
 type OrderResponse struct {
 	OrderID int    `json:"order_id"`
 	Status  string `json:"status"`
-	Total   int    `json:"total"`
+  Total   decimal.Decimal `json:"total"`
 }
