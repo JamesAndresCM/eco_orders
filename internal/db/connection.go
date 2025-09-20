@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	_ "github.com/lib/pq"
 	"github.com/JamesAndresCM/eco_orders/pkg/logger"
+	_ "github.com/lib/pq"
 )
 
 var DB *sql.DB
@@ -48,4 +48,3 @@ func InitDB() {
 
 	logger.Success(fmt.Sprintf("Connected to database %s in %s mode", dbName, env))
 }
-
