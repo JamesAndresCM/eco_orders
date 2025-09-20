@@ -1,4 +1,5 @@
 ### Run app
+- Rename `.env.sample` file to `.env` and set the environment variables
 - `go run ./cmd/ecoorders`
 
 ### Endpoint
