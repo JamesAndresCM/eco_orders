@@ -21,7 +21,8 @@ func main() {
 		defer db.DB.Close()
 	}
 
-  svc := &orders.Service{DB: db.DB}
+  repo := &orders.OrderRepository{DB: db.DB}
+  svc := &orders.Service{Repo: repo}
   handler := &handlers.OrderHandler{Service: svc}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/orders", handler.CreateOrderHandler)
