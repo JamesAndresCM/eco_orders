@@ -63,11 +63,6 @@ func (s *Service) ProcessOrder(req OrderRequest) (OrderResponse, error) {
 			return OrderResponse{}, fmt.Errorf("failed to insert order item: %w", err)
 		}
 
-		if err := s.Repo.UpdateStock(ctx, item.ProductID, item.Quantity); err != nil {
-			tx.Rollback()
-			return OrderResponse{}, fmt.Errorf("failed to update product stock: %w", err)
-		}
-
 		qty := decimal.NewFromInt(int64(item.Quantity))
 		total = total.Add(price.Mul(qty))
 	}

@@ -44,20 +44,12 @@ func (r *OrderRepository) InsertOrderItem(ctx context.Context, orderID, productI
 	return err
 }
 
-func (r *OrderRepository) UpdateStock(ctx context.Context, productID, quantity int) error {
-	_, err := r.DB.ExecContext(
-		ctx,
-		`UPDATE products SET stock_quantity = stock_quantity - $1, updated_at = NOW() WHERE id = $2`,
-		quantity, productID,
-	)
-	return err
-}
 
 func (r *OrderRepository) UpdateOrderTotal(ctx context.Context, orderID int, total decimal.Decimal) error {
 	_, err := r.DB.ExecContext(
 		ctx,
-		`UPDATE orders SET total_amount = $1, status = $2, updated_at = NOW() WHERE id = $3`,
-		total, 1, orderID,
+		`UPDATE orders SET total_amount = $1, updated_at = NOW() WHERE id = $2`,
+		total, orderID,
 	)
 	return err
 }
