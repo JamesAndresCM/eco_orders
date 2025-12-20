@@ -3,6 +3,7 @@ package kafka
 import (
 	"encoding/json"
 	"github.com/IBM/sarama"
+	"github.com/JamesAndresCM/eco_orders/internal/orders"
 	"github.com/JamesAndresCM/eco_orders/pkg/logger"
 )
 
@@ -14,7 +15,10 @@ type OrderCreateEvent struct {
 	} `json:"items"`
 }
 
-type OrderConsumer struct{}
+type OrderConsumer struct {
+	OrderService *orders.Service
+	Producer     *Producer
+}
 
 func (c *OrderConsumer) Setup(sarama.ConsumerGroupSession) error   { return nil }
 func (c *OrderConsumer) Cleanup(sarama.ConsumerGroupSession) error { return nil }
@@ -33,14 +37,39 @@ func (c *OrderConsumer) ConsumeClaim(
 			continue
 		}
 
-		logger.Success(
-			"✅ order received",
-			"user_id=", event.UserID,
-			"items=", len(event.Items),
-		)
+		logger.Info("📦 processing order from kafka user_id=", event.UserID)
 
-		// 👉 acá después llamamos a ProcessOrder(event)
+		req := orders.OrderRequest{
+			UserID: event.UserID,
+			Items:  make([]orders.OrderItem, 0, len(event.Items)),
+		}
 
+		for _, item := range event.Items {
+			req.Items = append(req.Items, orders.OrderItem{
+				ProductID: item.ProductID,
+				Quantity:  item.Quantity,
+			})
+		}
+
+		_, err := c.OrderService.ProcessOrder(req)
+
+		if err != nil {
+			logger.Error("❌ failed to process order:", err)
+			if c.Producer == nil {
+				logger.Error("❌ kafka producer is nil, cannot publish orders.failed")
+				session.MarkMessage(msg, "")
+				continue
+			}
+			c.Producer.PublishOrderFailed(
+				event.UserID,
+				event.Items,
+				err,
+			)
+			session.MarkMessage(msg, "")
+			continue
+		}
+
+		logger.Success("✅ order processed successfully user_id=", event.UserID)
 		session.MarkMessage(msg, "")
 	}
 

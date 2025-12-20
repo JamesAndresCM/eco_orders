@@ -3,10 +3,11 @@ package kafka
 import (
 	"context"
 	"github.com/IBM/sarama"
+	"github.com/JamesAndresCM/eco_orders/internal/orders"
 	"github.com/JamesAndresCM/eco_orders/pkg/logger"
 )
 
-func StartOrderConsumer(brokers []string) {
+func StartOrderConsumer(brokers []string, orderService *orders.Service, producer *Producer) {
 	config := sarama.NewConfig()
 	config.Version = sarama.V3_6_0_0
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest
@@ -18,10 +19,13 @@ func StartOrderConsumer(brokers []string) {
 	)
 	if err != nil {
 		logger.Error("❌ failed to create consumer group:", err)
-		return // ⬅️ ESTO ES CLAVE
+		return
 	}
 
-	consumer := &OrderConsumer{}
+	consumer := &OrderConsumer{
+		OrderService: orderService,
+		Producer:     producer,
+	}
 	ctx := context.Background()
 
 	for {

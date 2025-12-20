@@ -28,7 +28,12 @@ func main() {
 	brokers := kafka.BrokersFromEnv()
 	logger.Info("Kafka brokers:", brokers)
 
-	go kafka.StartOrderConsumer(brokers)
+	producer, err := kafka.NewProducer(brokers)
+	if err != nil {
+		logger.Error("❌ failed to create kafka producer:", err)
+	}
+
+	go kafka.StartOrderConsumer(brokers, svc, producer)
 
 	handler := &handlers.OrderHandler{Service: svc}
 	mux := http.NewServeMux()
