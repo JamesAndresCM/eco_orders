@@ -7,6 +7,7 @@ import (
 	"github.com/JamesAndresCM/eco_orders/internal/handlers"
 	"github.com/JamesAndresCM/eco_orders/internal/orders"
 	"github.com/JamesAndresCM/eco_orders/pkg/logger"
+  "github.com/JamesAndresCM/eco_orders/internal/kafka"
 	"github.com/joho/godotenv"
 	"net/http"
 )
@@ -23,6 +24,8 @@ func main() {
 
 	repo := &orders.OrderRepository{DB: db.DB}
 	svc := &orders.Service{Repo: repo}
+  brokers := kafka.BrokersFromEnv()
+	logger.Info("Kafka brokers:", brokers)
 	handler := &handlers.OrderHandler{Service: svc}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/orders", handler.CreateOrderHandler)
