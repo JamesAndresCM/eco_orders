@@ -32,12 +32,12 @@ func (c *OrderConsumer) ConsumeClaim(
 		var event OrderCreateEvent
 
 		if err := json.Unmarshal(msg.Value, &event); err != nil {
-			logger.Error("❌ invalid message:", err)
+			logger.Error("invalid message:", err)
 			session.MarkMessage(msg, "")
 			continue
 		}
 
-		logger.Info("📦 processing order from kafka user_id=", event.UserID)
+		logger.Info("processing order from kafka user_id=", event.UserID)
 
 		req := orders.OrderRequest{
 			UserID: event.UserID,
@@ -51,27 +51,39 @@ func (c *OrderConsumer) ConsumeClaim(
 			})
 		}
 
-		_, err := c.OrderService.ProcessOrder(req)
-
+		resp, err := c.OrderService.ProcessOrder(req)
 		if err != nil {
-			logger.Error("❌ failed to process order:", err)
-			if c.Producer == nil {
-				logger.Error("❌ kafka producer is nil, cannot publish orders.failed")
-				session.MarkMessage(msg, "")
-				continue
+			logger.Error("failed to process order:", err)
+
+			if c.Producer != nil {
+				c.Producer.PublishOrderFailed(
+					event.UserID,
+					req.Items,
+					err,
+				)
+			} else {
+				logger.Error("kafka producer is nil, cannot publish orders.failed")
 			}
-			c.Producer.PublishOrderFailed(
-				event.UserID,
-				event.Items,
-				err,
-			)
+
 			session.MarkMessage(msg, "")
 			continue
 		}
 
-		logger.Success("✅ order processed successfully user_id=", event.UserID)
+		if c.Producer != nil {
+			if err := c.Producer.PublishOrderProcessed(
+				event.UserID,
+				resp.OrderID,
+				req.Items,
+				resp.Total.String(),
+			); err != nil {
+				logger.Error("failed to publish orders.processed:", err)
+			}
+		}
+
+		logger.Success("order processed successfully user_id=", event.UserID)
 		session.MarkMessage(msg, "")
 	}
 
 	return nil
 }
+

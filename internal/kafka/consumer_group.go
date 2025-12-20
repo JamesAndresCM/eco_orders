@@ -18,7 +18,7 @@ func StartOrderConsumer(brokers []string, orderService *orders.Service, producer
 		config,
 	)
 	if err != nil {
-		logger.Error("❌ failed to create consumer group:", err)
+		logger.Error("failed to create consumer group:", err)
 		return
 	}
 
@@ -34,7 +34,7 @@ func StartOrderConsumer(brokers []string, orderService *orders.Service, producer
 			[]string{"orders.create"},
 			consumer,
 		); err != nil {
-			logger.Error("❌ consume error:", err)
+			logger.Error("consume error:", err)
 		}
 	}
 }

@@ -30,7 +30,7 @@ func main() {
 
 	producer, err := kafka.NewProducer(brokers)
 	if err != nil {
-		logger.Error("❌ failed to create kafka producer:", err)
+		logger.Error("failed to create kafka producer:", err)
 	}
 
 	go kafka.StartOrderConsumer(brokers, svc, producer)
