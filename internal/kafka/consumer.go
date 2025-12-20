@@ -1,11 +1,9 @@
 package kafka
 
 import (
-	"context"
 	"encoding/json"
-	"log"
-  "github.com/JamesAndresCM/eco_orders/pkg/logger"
 	"github.com/IBM/sarama"
+	"github.com/JamesAndresCM/eco_orders/pkg/logger"
 )
 
 type OrderCreateEvent struct {
@@ -36,9 +34,9 @@ func (c *OrderConsumer) ConsumeClaim(
 		}
 
 		logger.Success(
-			"✅ order received user_id=%d items=%d\n",
-			event.UserID,
-			len(event.Items),
+			"✅ order received",
+			"user_id=", event.UserID,
+			"items=", len(event.Items),
 		)
 
 		// 👉 acá después llamamos a ProcessOrder(event)
@@ -48,4 +46,3 @@ func (c *OrderConsumer) ConsumeClaim(
 
 	return nil
 }
-

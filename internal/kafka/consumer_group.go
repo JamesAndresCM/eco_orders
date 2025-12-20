@@ -2,9 +2,8 @@ package kafka
 
 import (
 	"context"
-	"log"
-  "github.com/JamesAndresCM/eco_orders/pkg/logger"
 	"github.com/IBM/sarama"
+	"github.com/JamesAndresCM/eco_orders/pkg/logger"
 )
 
 func StartOrderConsumer(brokers []string) {
@@ -19,6 +18,7 @@ func StartOrderConsumer(brokers []string) {
 	)
 	if err != nil {
 		logger.Error("❌ failed to create consumer group:", err)
+		return // ⬅️ ESTO ES CLAVE
 	}
 
 	consumer := &OrderConsumer{}
@@ -34,4 +34,3 @@ func StartOrderConsumer(brokers []string) {
 		}
 	}
 }
-
