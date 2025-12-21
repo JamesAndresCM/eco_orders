@@ -5,6 +5,7 @@ import (
 
 	"github.com/JamesAndresCM/eco_orders/internal/db"
 	"github.com/JamesAndresCM/eco_orders/internal/handlers"
+	"github.com/JamesAndresCM/eco_orders/internal/kafka"
 	"github.com/JamesAndresCM/eco_orders/internal/orders"
 	"github.com/JamesAndresCM/eco_orders/pkg/logger"
 	"github.com/joho/godotenv"
@@ -23,6 +24,17 @@ func main() {
 
 	repo := &orders.OrderRepository{DB: db.DB}
 	svc := &orders.Service{Repo: repo}
+
+	brokers := kafka.BrokersFromEnv()
+	logger.Info("Kafka brokers:", brokers)
+
+	producer, err := kafka.NewProducer(brokers)
+	if err != nil {
+		logger.Error("failed to create kafka producer:", err)
+	}
+
+	go kafka.StartOrderConsumer(brokers, svc, producer)
+
 	handler := &handlers.OrderHandler{Service: svc}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/orders", handler.CreateOrderHandler)
